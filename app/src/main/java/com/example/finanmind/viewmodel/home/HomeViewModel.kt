@@ -27,7 +27,6 @@ class HomeViewModel(
 
     private fun updateState() {
         val transactions = transactionsRepository.transactions
-        print(transactions)
         _uiState.value = uiState.value.copy(
             incomes = transactions.incomes,
             invoices = transactions.invoices,
