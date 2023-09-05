@@ -1,53 +1,45 @@
 package com.example.finanmind.viewmodel.home
 
+import android.os.Debug
 import androidx.lifecycle.ViewModel
 import com.example.finanmind.models.Transaction
 import com.example.finanmind.models.Transactions
+import com.example.finanmind.repositories.TransactionsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import java.util.Date
 
 
-class HomeViewModel : ViewModel() {
-    private val _incomes = MutableStateFlow<List<Transaction>>(listOf())
-    private val _invoices = MutableStateFlow<List<Transaction>>(listOf())
-
-    private val _uiState =
-        MutableStateFlow(
-            Transactions(
-                incomes = listOf(),
-                incomesTotal = 0.0,
-                invoices = listOf(),
-                invoicesTotal = 0.0
-            )
-        )
-    val uiState: StateFlow<Transactions> = _uiState.asStateFlow()
-
+class HomeViewModel(
+    private val transactionsRepository: TransactionsRepository
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState
 
     fun setIncomes(transaction: Transaction) {
-        val incomes = _incomes.value.toMutableList()
-        incomes.add(transaction)
-        _incomes.value = incomes
-        setTransaction()
+        transactionsRepository.addIncomes(transaction)
+        updateState()
     }
 
     fun setInvoices(transaction: Transaction) {
-        val invoices = _invoices.value.toMutableList()
-        invoices.add(transaction)
-        _invoices.value = invoices
-        setTransaction()
+        transactionsRepository.addInvoices(transaction)
+        updateState()
     }
 
-    private fun setTransaction() {
-        val incomes = _incomes.value.toMutableList()
-        val invoices = _invoices.value.toMutableList()
-
-        _uiState.value = Transactions(
-            incomes,
-            incomesTotal = incomes.sumOf { it.value },
-            invoices,
-            invoicesTotal = invoices.sumOf { it.value }
+    private fun updateState() {
+        val transactions = transactionsRepository.transactions
+        print(transactions)
+        _uiState.value = uiState.value.copy(
+            incomes = transactions.incomes,
+            invoices = transactions.invoices,
+            invoicesTotal = transactions.invoicesTotal,
+            incomesTotal = transactions.incomesTotal
         )
     }
+
+    data class UiState(
+        val incomes: List<Transaction> = emptyList(),
+        val invoices: List<Transaction> = emptyList(),
+        val incomesTotal: Double = incomes.sumOf { it.value },
+        val invoicesTotal: Double = invoices.sumOf { it.value }
+    )
 }
