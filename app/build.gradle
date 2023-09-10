@@ -47,6 +47,10 @@ android {
 }
 
 dependencies {
+    // Navigation compose module
+    def nav_version = "2.5.3"
+    implementation "androidx.navigation:navigation-compose:$nav_version"
+
     def lifecycle_version = "2.6.1"
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
